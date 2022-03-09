@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.2)
+cmake_minimum_required(VERSION 3.0.2)
 project(icp_docking)
 
 
@@ -40,10 +40,6 @@ catkin_package(
 #  CATKIN_DEPENDS roscpp sensor_msgs
 #  DEPENDS system_lib
 )
-
-
-
-
 
 include_directories(
   include

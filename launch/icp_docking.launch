@@ -1,0 +1,25 @@
+<launch>
+
+  <arg name="debug" default="false" />
+  <arg unless="$(arg debug)" name="launch-prefix" value=" "/>
+  <arg if="$(arg debug)" name="launch-prefix" value="gdb -ex run --args"/>
+
+	<node name="eureca_popeye_docking" pkg="icp_docking" type="icp_docking_node" output="screen" launch-prefix="$(arg launch-prefix)">
+
+    <param name="laser_scan_topic"  value="/scan"/>
+    <param name="frame_name"  value="laser"/>
+    <param name="timeout"  value="25.0"/>
+
+    <param name="cone_min"  value="1.57"/>
+    <param name="cone_max"  value="4.71"/>
+
+    <param name="xpid"  value="10.0"/>
+    <param name="ypid"  value="10.0"/>
+    <param name="zpid"  value="20.0"/>
+    <param name="cmd_vel_topic" value="/cmd_vel" />
+  </node>
+
+
+
+
+</launch>

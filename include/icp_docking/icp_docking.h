@@ -27,10 +27,10 @@
 #include <iostream>
 
 
-#define LASER_FIXED_FILTER_LENGTH 10
-#define LASER_SCAN_FILTER_LENGTH  3
-#define FILT_DIST                 3.0
-#define MIN_DIST                  0.3
+constexpr int   LASER_FIXED_FILTER_LENGTH  = 10;
+constexpr int   LASER_SCAN_FILTER_LENGTH   = 3;
+constexpr double FILT_DIST                 = 3.0;
+constexpr double MIN_DIST                  = 0.3;
 
 class icp_docking_class
 {
@@ -58,8 +58,6 @@ class icp_docking_class
 
         geometry_msgs::Twist cmd_vel_dock;
 
-        // ros::Rate _rt(25);
-
 
         //PCL
         boost::circular_buffer<sensor_msgs::PointCloud>  _pcl_buffer;//
@@ -80,7 +78,7 @@ class icp_docking_class
 
     public:
 
-        icp_docking_class(ros::NodeHandle* nodehandle);
+        explicit icp_docking_class(ros::NodeHandle* nodehandle);
 
         void LasCallback(const sensor_msgs::LaserScanConstPtr& msg);
 

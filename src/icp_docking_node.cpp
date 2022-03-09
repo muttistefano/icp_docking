@@ -21,7 +21,7 @@ void icp_docking_class::LasCallback(const sensor_msgs::LaserScanConstPtr& msg)
     _NewPcl.points.clear();
     for (size_t cnt = 0; cnt < msg->ranges.size (); cnt++)
     {
-        double ang = msg->angle_min + msg->angle_increment * cnt;
+        double ang = msg->angle_min + msg->angle_increment * static_cast<double>(cnt);
         if((msg->ranges[cnt] < FILT_DIST) && (msg->ranges[cnt] > MIN_DIST) && (ang > _cone_min) && (ang < _cone_max))
         {
             _pnt_filt.x =  (cos(ang) * msg->ranges[cnt]);
@@ -56,7 +56,7 @@ bool icp_docking_class::save_pcl_call(icp_docking::save_pcl::Request  &req, icp_
     {
         sensor_msgs::LaserScanConstPtr LaserFixed = ros::topic::waitForMessage<sensor_msgs::LaserScan>(_laser_scan_name,_nh);
         
-        int sizfx  = LaserFixed->ranges.size();
+        int sizfx  = static_cast<int>(LaserFixed->ranges.size());
         if(cnt==0)
         {
             cloud_save->width    = sizfx;
@@ -68,7 +68,7 @@ bool icp_docking_class::save_pcl_call(icp_docking::save_pcl::Request  &req, icp_
         }
         for (size_t i = 0; i < cloud_save->points.size (); ++i)
         {
-            double ang = LaserFixed->angle_min + (LaserFixed->angle_increment * i);
+            double ang = LaserFixed->angle_min + (LaserFixed->angle_increment * static_cast<double>(i));
             // ROS_INFO_STREAM(LaserFixed->ranges[i] << " " << ang << std::endl);
             if((LaserFixed->ranges[i] < FILT_DIST) && (LaserFixed->ranges[i] > MIN_DIST) && (ang > _cone_min) && (ang < _cone_max))
             {
@@ -94,8 +94,8 @@ bool icp_docking_class::save_pcl_call(icp_docking::save_pcl::Request  &req, icp_
     {
         if(_Invalid_Data[i] < 2)//WTF
         {
-            cloud_save->points[i].x = cloud_save->points[i].x / (float(LASER_FIXED_FILTER_LENGTH) - float(_Invalid_Data[i]));
-            cloud_save->points[i].y = cloud_save->points[i].y / (float(LASER_FIXED_FILTER_LENGTH) - float(_Invalid_Data[i]));
+            cloud_save->points[i].x = cloud_save->points[i].x / (double(LASER_FIXED_FILTER_LENGTH) - double(_Invalid_Data[i]));
+            cloud_save->points[i].y = cloud_save->points[i].y / (double(LASER_FIXED_FILTER_LENGTH) - double(_Invalid_Data[i]));
         }
         else
         {
@@ -125,7 +125,7 @@ bool icp_docking_class::save_pcl_call(icp_docking::save_pcl::Request  &req, icp_
 
     _PclFilt.points.clear();
     geometry_msgs::Point32 _pnt_filt;
-    for(auto& pnt: cloud_save->points)
+    for(const auto& pnt: cloud_save->points)
     {
         _pnt_filt.x = pnt.x;
         _pnt_filt.y = pnt.y;
@@ -164,7 +164,7 @@ bool icp_docking_class::move_pcl_call(icp_docking::move_to_pcl::Request  &req, i
     
     _PclFilt.points.clear();
     geometry_msgs::Point32 _pnt_filt;
-    for(auto& pnt: _cloud_out->points)
+    for(const auto& pnt: _cloud_out->points)
     {
         _pnt_filt.x = pnt.x;
         _pnt_filt.y = pnt.y;
@@ -190,7 +190,7 @@ bool icp_docking_class::move_pcl_call(icp_docking::move_to_pcl::Request  &req, i
     while(ros::ok() && (ros::Time::now() - start_time).toSec() <= _timeout  )
     {
         _Lock1.lock();
-        int siz = _NewPcl.points.size();
+        int siz = static_cast<int>(_NewPcl.points.size());
 
         _output_pub.publish(_NewPcl);
         
@@ -237,7 +237,7 @@ bool icp_docking_class::move_pcl_call(icp_docking::move_to_pcl::Request  &req, i
         wrench_out.wrench.force.z  = _icp_out2(2,3);
         Eigen::Affine3d b;
         b.matrix() = _icp_out2;
-        Eigen::Quaterniond qua = Eigen::Quaterniond(b.linear());
+        auto qua = Eigen::Quaterniond(b.linear());
         
         Eigen::Vector3d eul = qua.toRotationMatrix().eulerAngles(0, 1, 2);
         wrench_out.wrench.torque.x = eul[0];
@@ -260,6 +260,7 @@ bool icp_docking_class::move_pcl_call(icp_docking::move_to_pcl::Request  &req, i
         _rt.sleep();
     }
     _sub.shutdown();
+    res.success = true;
     return true;
 }
 
@@ -303,12 +304,7 @@ int main(int argc, char **argv)
     
 
     icp_docking_class icp_node(&nh);
- 
-    // nh.setParam("/icp_err/x", outx);
-    // nh.setParam("/icp_err/y", outy);
-    // nh.setParam("/icp_err/z", outz);
-
-    // nh.setParam("/tasks/SWEEPEE_POPEYE_FROM_ELEVATOR_TO_FUSELAGE_ASSEMBLY/status", "dock_popeye_done");    
+   
     ros::Duration(2).sleep();
     ros::waitForShutdown();
     return 0;
